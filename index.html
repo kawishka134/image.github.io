@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>පින්තූර විශ්ලේෂකය</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f3f3f3;
+    }
+    h1 {
+      color: #333;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #e0e0e0;
+      display: none;
+    }
+    #result.edited {
+      background-color: #ffcccc;
+      color: #d00000;
+    }
+    #result.original {
+      background-color: #ccffcc;
+      color: #008000;
+    }
+  </style>
+</head>
+<body>
+  <h1>පින්තූරයේ මූලිකත්වය පරීක්ෂා කරන්න</h1>
+  <input type="file" id="imageInput" accept="image/*">
+  <div id="result"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+  <script>
+    document.getElementById('imageInput').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        EXIF.getData(file, function () {
+          const make = EXIF.getTag(this, "Make");
+          const model = EXIF.getTag(this, "Model");
+          const software = EXIF.getTag(this, "Software");
+
+          const resultDiv = document.getElementById('result');
+
+          if (make && model && !software) {
+            // මුල් පින්තූරයක් ලෙස සලකයි
+            resultDiv.textContent = "මෙම පින්තූරය මුල් පින්තූරයක් (කැමරාවෙන් පමණක් අල්ලන ලදි)";
+            resultDiv.className = "original";
+          } else if (software && software.toLowerCase().includes("whatsapp")) {
+            // WhatsApp හරහා එවූ පින්තූරයක් වීම
+            resultDiv.textContent = "මෙම පින්තූරය WhatsApp හරහා එවන ලදි. එය මුල් පින්තූරයක් ලෙස සලකයි.";
+            resultDiv.className = "original";
+          } else if (software) {
+            // සංස්කරණය කර ඇති බව පෙන්වීම
+            resultDiv.textContent = "මෙම පින්තූරය සංස්කරණය කර ඇත (සොෆ්ට්වෙයා: " + software + ")";
+            resultDiv.className = "edited";
+          } else {
+            // Metadata නොමැති නම්
+            resultDiv.textContent = "මෙම පින්තූරයේ Metadata නොමැත, එබැවින් මෙය සංස්කරණය කර ඇති බවක් විය හැක.";
+            resultDiv.className = "edited";
+          }
+
+          resultDiv.style.display = "block";
+        });
+      }
+    });
+  </script>
+</body>
+</html>
